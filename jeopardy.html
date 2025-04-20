@@ -85,6 +85,7 @@
     justify-content: center;
     align-items: center;
     z-index: 10;
+    font-size: 2.5em;
   }
 
   #clue-content {
@@ -98,7 +99,7 @@
     position: relative;
   }
   #clue-text.huge{
-    font-size: 7em;
+    font-size: 3em;
   }
 
   #close-button {
@@ -314,6 +315,9 @@
       clueText.innerHTML = clue; // Use innerHTML to render potential HTML in clue
       if (currentClueElement.classList.contains('huge')){
         clueText.classList.add('huge');
+      }
+      else{
+        clueText.classList.remove('huge');
       }
       clueModal.style.display = 'flex';
     }
