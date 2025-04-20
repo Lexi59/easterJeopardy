@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Jeopardy Boards</title>
+<style>
+  body {
+    font-family: sans-serif;
+    background-color: #060CE9; /* Jeopardy Blue */
+    color: #FFF100; /* Jeopardy Yellow */
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .board-container {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr); /* 6 Categories */
+    width: 90%;
+    max-width: 960px;
+    margin-bottom: 20px;
+    position: relative; /* Needed for absolute positioning of the background */
+    grid-row-gap: 0; /* Remove vertical gap */
+    grid-column-gap: 0; /* Remove horizontal gap */
+  }
+
+  .board-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-repeat: no-repeat;
+    z-index: -1; /* Place behind the board elements */
+    border-radius: 5px; /* Optional: Match board container radius */
+    overflow: hidden; /* Clip any potential image overflow if using border-radius */
+  }
+
+  .category {
+    background-color: rgba(11, 19, 84); /* Darker Blue with Transparency */
+    color: #FFFFFF;
+    padding: 15px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.2em;
+    position: relative; /* Ensure text is above the background */
+  }
+
+  .clue-value {
+    background-color: rgba(11, 19, 84); /* Darker Blue with Transparency */
+    color: #FFF100;
+    padding: 20px;
+    text-align: center;
+    font-size: 1.5em;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80px;
+    transition: background-color 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    position: relative; /* Ensure text is above the background */
+  }
+
+  .clue-value.correct {
+    background-color: transparent;
+    opacity: 0.7; /* Optional: Add a slight dimming effect */
+  }
+
+  .clue-value.incorrect {
+    background-color: rgba(255, 0, 0); /* Red with Transparency */
+    color: red;
+  }
+
+  #clue-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #FFFFFF;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+  }
+
+  #clue-content {
+    background-color: #0B1354;
+    padding: 30px;
+    border-radius: 8px;
+    text-align: center;
+    max-width: 80%;
+    max-height: 80%;
+    overflow-y: auto;
+    position: relative;
+  }
+
+  #close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: #FFFFFF;
+    font-size: 1.5em;
+    cursor: pointer;
+  }
+
+  #score-container {
+    background-color: rgba(11, 19, 84); /* Darker Blue with Transparency */
+    color: #FFF100;
+    padding: 15px;
+    border-radius: 5px;
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+
+  #board-switcher {
+    margin-bottom: 10px;
+  }
+
+  #board-switcher button {
+    padding: 8px 15px;
+    font-size: 1em;
+    cursor: pointer;
+    background-color: #0B1354;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 5px;
+    margin-right: 10px;
+  }
+
+  .keyboard-shortcuts {
+    color: #FFFFFF;
+    font-size: 0.9em;
+    margin-top: 10px;
+  }
+</style>
+</head>
+<body>
+
+    <div id="score-container">Score: $<span id="total-score">0</span></div>
+
+    <div id="board-switcher">
+      <button onclick="switchBoard(1)">Board 1</button>
+      <button onclick="switchBoard(2)">Board 2</button>
+    </div>
+  
+    <div id="board-container-1" class="board-container">
+      <div id="board-background-1" class="board-background" style="background-image: url('background1.png');"></div>
+      <div class="category">Name Play</div>
+      <div class="category">Spice & Space</div>
+      <div class="category">Auto Biography</div>
+      <div class="category">Emoji-nal Dialogue</div>
+      <div class="category">British Invasion</div>
+      <div class="category">Blast from the Past</div>
+  
+      <div class="clue-value" data-board="1" data-category="0" data-value="200" data-clue="Automotive + plural for the male gender">200</div>
+      <div class="clue-value" data-board="1" data-category="1" data-value="200" data-clue="<img src='marcMurphy.jpeg' style='max-width: 350px; height: auto;'><img src='markKelly.jpg' style='max-width: 350px; height: auto;'>">200</div>
+      <div class="clue-value" data-board="1" data-category="2" data-value="200" data-clue="Airplane Driver">200</div>
+      <div class="clue-value" data-board="1" data-category="3" data-value="200" data-clue="👨‍🦰🦙🏈🎳🗳🕺">200</div>
+      <div class="clue-value" data-board="1" data-category="4" data-value="200" data-clue="Help! Yesterday, Abbey Road">200</div>
+      <div class="clue-value" data-board="1" data-category="5" data-value="200" data-clue="Name this town. <br> <img src='aerial.jpg' style='width: 550px; height: auto;'>">200</div>
+  
+      <div class="clue-value" data-board="1" data-category="0" data-value="400" data-clue="<img src='virginia.png' alt='outline of state' style='max-width: 150px; height: auto;'>">400</div>
+      <div class="clue-value" data-board="1" data-category="1" data-value="400" data-clue="<img src='michaelVoltaggio.jpeg' style='width: 300px; height: auto;'><img src='michaelCollins.jpeg' style='width: 350px; height: auto;'>">400</div>
+      <div class="clue-value" data-board="1" data-category="2" data-value="400" data-clue="Mythical island where King Authur is said to have taken his final battle">400</div>
+      <div class="clue-value" data-board="1" data-category="3" data-value="400" data-clue="🧙‍♂️🐒👠🐶 🦁">400</div>
+      <div class="clue-value" data-board="1" data-category="4" data-value="400" data-clue="Behind blue eyes, I can see for miles, the song is over">400</div>
+      <div class="clue-value" data-board="1" data-category="5" data-value="400" data-clue="<img src='highSchool.jpg' style='width: 550px; height: auto;'>">400</div>
+  
+      <div class="clue-value" data-board="1" data-category="0" data-value="600" data-clue="Potter's medium + 2,000 lbs">600</div>
+      <div class="clue-value" data-board="1" data-category="1" data-value="600" data-clue="<img src='scottConant.jpg' style='width: 350px; height: auto;'><img src='scottKelly.jpeg' style='width: 250px; height: auto;'>">600</div>
+      <div class="clue-value" data-board="1" data-category="2" data-value="600" data-clue="Acronym for what might happen if you run out of gas in your van">600</div>
+      <div class="clue-value" data-board="1" data-category="3" data-value="600" data-clue="🤵🍸🔫">600</div>
+      <div class="clue-value" data-board="1" data-category="4" data-value="600" data-clue="It's only rock and roll, Honky Tonk Women, sympathy for the devil">600</div>
+      <div class="clue-value" data-board="1" data-category="5" data-value="600" data-clue="<img src='library.jpeg' style='width: 550px; height: auto;'>">600</div>
+  
+      <div class="clue-value" data-board="1" data-category="0" data-value="800" data-clue="Nurse's favorite unit of measure">800</div>
+      <div class="clue-value" data-board="1" data-category="1" data-value="800" data-clue="<img src='gordonRamsey.jpeg' style='width: 350px; height: auto;'><img src='gordonCooper.webp' style='max-width: 300px; height: auto;'>">800</div>
+      <div class="clue-value" data-board="1" data-category="2" data-value="800" data-clue="Law enforcement for a particular territory, especially parks and forests">800</div>
+      <div class="clue-value" data-board="1" data-category="3" data-value="800" data-clue="🏃‍♂️ + 🌲🌳 + 🏃‍♂️ (🦐)">800</div>
+      <div class="clue-value" data-board="1" data-category="4" data-value="800" data-clue="You really got me, supersonic rocket ship, waterloo sunset">800</div>
+      <div class="clue-value" data-board="1" data-category="5" data-value="800" data-clue="<img src='Hospital.jpg' style='width: 550px; height: auto;'>">800</div>
+  
+      <div class="clue-value" data-board="1" data-category="0" data-value="1000" data-clue="The foundational line that keeps a vessel upright, unlike someone who might lose their balance.">1000</div>
+      <div class="clue-value" data-board="1" data-category="1" data-value="1000" data-clue="<img src='RobertIrvine.jpg' style='max-width: 350px; height: auto;'><img src='Robert_Crippen.jpg' style='max-width: 300px; height: auto;'>">1000</div>
+      <div class="clue-value" data-board="1" data-category="2" data-value="1000" data-clue="Truck type synonymous for RV Unique">1000</div>
+      <div class="clue-value" data-board="1" data-category="3" data-value="1000" data-clue="🧑‍✈️🍸🍗🐟🩺">1000</div>
+      <div class="clue-value" data-board="1" data-category="4" data-value="1000" data-clue="Tell her no, time of the season, care of cell 44">1000</div>
+      <div class="clue-value" data-board="1" data-category="5" data-value="1000" data-clue="<img src='elksClub.jpg' style='width: 550px; height: auto;'>">1000</div>
+    </div>
+  
+    <div id="board-container-2" class="board-container" style="display: none;">
+      <div id="board-background-2" class="board-background" style="background-image: url('background2.png');"></div>
+      <div class="category">Word Play</div>
+      <div class="category">Themes</div>
+      <div class="category">Monk-y Business</div>
+      <div class="category">Basket Case</div>
+      <div class="category">Memory Lane</div>
+      <div class="category">Board-om</div>
+  
+      <div class="clue-value" data-board="2" data-category="0" data-value="200" data-clue="Spoonerized version of the Sunday before Easter.">200</div>
+      <div class="clue-value" data-board="2" data-category="1" data-value="200" data-clue='<audio controls></div><source src="jetsons.mp3" type="audio/mpeg">Your browser does not support the audio element.</audio>'>200</div>
+      <div class="clue-value" data-board="2" data-category="2" data-value="200" data-clue="The only acceptable water brand">200</div>
+      <div class="clue-value" data-board="2" data-category="3" data-value="200" data-clue="Often the sweetest and most sought after items, sometimes inside plastic eggs">200</div>
+      <div class="clue-value" data-board="2" data-category="4" data-value="200" data-clue="Best thing to say before riding your bike into a tree">200</div>
+      <div class="clue-value" data-board="2" data-category="5" data-value="200" data-clue="Game involving numerical tiles, runs, and sets.">200</div>
+  
+      <div class="clue-value" data-board="2" data-category="0" data-value="400" data-clue="Spoonerized verion of famous male talk show host who counsels people on their problems.">400</div>
+      <div class="clue-value" data-board="2" data-category="1" data-value="400" data-clue='<audio controls></div><source src="andy.mp3" type="audio/mpeg">Your browser does not support the audio element.</audio>'>400</div>
+      <div class="clue-value" data-board="2" data-category="2" data-value="400" data-clue="Phrase used when Monk does something helpful, but quirky">400</div>
+      <div class="clue-value" data-board="2" data-category="3" data-value="400" data-clue="A classic centerpiece with long ears and a sweet aroma">400</div>
+      <div class="clue-value" data-board="2" data-category="4" data-value="400" data-clue="Unwanted amphibious shower guest">400</div>
+      <div class="clue-value" data-board="2" data-category="5" data-value="400" data-clue="The title of this game is synonymous with something villians, heros, or other characters often have.">400</div>
+  
+      <div class="clue-value" data-board="2" data-category="0" data-value="600" data-clue="Spoonerized version of a friendly couple, not to be confused with a statue.">600</div>
+      <div class="clue-value" data-board="2" data-category="1" data-value="600" data-clue='<audio controls></div><source src="mash.mp3" type="audio/mpeg">Your browser does not support the audio element.</audio>'>600</div>
+      <div class="clue-value" data-board="2" data-category="2" data-value="600" data-clue="Woman who started it all">600</div>
+      <div class="clue-value" data-board="2" data-category="3" data-value="600" data-clue="Reusable containers filled with treats and often hidden in the yard">600</div>
+      <div class="clue-value" data-board="2" data-category="4" data-value="600" data-clue="Something you should measure before you buy a new vehicle">600</div>
+      <div class="clue-value" data-board="2" data-category="5" data-value="600" data-clue="Game that includes tossing farm animals">600</div>
+  
+      <div class="clue-value" data-board="2" data-category="0" data-value="800" data-clue="Funny name for pork ribs, reminiscent of a summer treat">800</div>
+      <div class="clue-value" data-board="2" data-category="1" data-value="800" data-clue='<audio controls></div><source src="hillbillies.mp3" type="audio/mpeg">Your browser does not support the audio element.</audio>'>800</div>
+      <div class="clue-value" data-board="2" data-category="2" data-value="800" data-clue="Required action after shaking someone's hand">800</div>
+      <div class="clue-value" data-board="2" data-category="3" data-value="800" data-clue="Tiny, chewy, and come in a rainbow of flavors, perfect for filling empty spaces">800</div>
+      <div class="clue-value" data-board="2" data-category="4" data-value="800" data-clue="Result of filling your glass from unfamiliar faucets">800</div>
+      <div class="clue-value" data-board="2" data-category="5" data-value="800" data-clue="A game where the box can't be set to the side">800</div>
+  
+      <div class="clue-value" data-board="2" data-category="0" data-value="1000" data-clue="Term used when unsure of exact location of a tool, component, or outdoor item">1000</div>
+      <div class="clue-value" data-board="2" data-category="1" data-value="1000" data-clue='<audio controls></div><source src="emergency.mp3" type="audio/mpeg">Your browser does not support the audio element.</audio>'>1000</div>
+      <div class="clue-value" data-board="2" data-category="2" data-value="1000" data-clue="Scientifically superior sandwich component">1000</div>
+      <div class="clue-value" data-board="2" data-category="3" data-value="1000" data-clue="Those sugary, marshmallow chicks or bunnies that often come in bright colors">1000</div>
+      <div class="clue-value" data-board="2" data-category="4" data-value="1000" data-clue="Two embarassing things to do at Jack's Stack">1000</div>
+      <div class="clue-value" data-board="2" data-category="5" data-value="1000" data-clue="synonymous with 'Rumor has it', a game about spelling.">1000</div>
+    </div>
+  
+    <div id="clue-modal">
+      <div id="clue-content">
+        <button id="close-button">&times;</button>
+        <p id="clue-text"></p>
+        <button id="correct-button">Correct (+Value)</button>
+        <button id="incorrect-button">Incorrect (-Value)</button>
+      </div>
+    </div>
+  
+
+  <p class="keyboard-shortcuts">
+    **Keyboard Shortcuts:**<br>
+    - **Esc:** Back to Board<br>
+    - **C:** Correct Answer<br>
+    - **I:** Incorrect Answer
+  </p>
+
+  <script>
+ const boardContainer1 = document.getElementById('board-container-1');
+    const boardContainer2 = document.getElementById('board-container-2');
+    const boardBackground1 = document.getElementById('board-background-1');
+    const boardBackground2 = document.getElementById('board-background-2');
+    const clueModal = document.getElementById('clue-modal');
+    const clueContent = document.getElementById('clue-content');
+    const clueText = document.getElementById('clue-text');
+    const closeButton = document.getElementById('close-button');
+    const correctButton = document.getElementById('correct-button');
+    const incorrectButton = document.getElementById('incorrect-button');
+    const totalScoreSpan = document.getElementById('total-score');
+
+    let currentClueElement = null;
+    let currentBoard = 1;
+    let totalScore = 0;
+
+    // Function to attach click listeners to the currently visible board's clues
+    function attachClueListeners() {
+      const clueValueElements = document.querySelectorAll('.clue-value');
+      clueValueElements.forEach(element => {
+        // Only add listener if it's on the currently visible board and doesn't already have it
+        const isVisible = (currentBoard === 1 && element.dataset.board === '1') || (currentBoard === 2 && element.dataset.board === '2');
+        if (isVisible && !element.classList.contains('has-listener')) {
+          element.addEventListener('click', handleClueClick);
+          element.classList.add('has-listener'); // Mark that the listener is attached
+        } else if (!isVisible && element.classList.contains('has-listener')) {
+          element.removeEventListener('click', handleClueClick);
+          element.classList.remove('has-listener');
+        }
+      });
+    }
+
+    // Function to switch between game boards
+    function switchBoard(boardNumber) {
+      if (boardNumber === 1) {
+        boardContainer1.style.display = 'grid';
+        boardContainer2.style.display = 'none';
+        currentBoard = 1;
+      } else if (boardNumber === 2) {
+        boardContainer1.style.display = 'none';
+        boardContainer2.style.display = 'grid';
+        currentBoard = 2;
+      }
+      attachClueListeners(); // Attach listeners after switching
+    }
+
+    // Function to open the clue modal
+    function openClue(element) {
+      currentClueElement = element;
+      const clue = element.dataset.clue;
+      clueText.innerHTML = clue; // Use innerHTML to render potential HTML in clue
+      clueModal.style.display = 'flex';
+    }
+
+    // Function to close the clue modal and update the clue box
+    function closeClue(correct = null) {
+      if (currentClueElement) {
+        if (correct === true) {
+          currentClueElement.classList.add('correct');
+          currentClueElement.textContent = '';
+          currentClueElement.style.cursor = 'default';
+          currentClueElement.removeEventListener('click', handleClueClick);
+          currentClueElement.classList.remove('has-listener'); // Clean up listener flag
+        } else if (correct === false) {
+          currentClueElement.classList.add('incorrect');
+        }
+        currentClueElement = null;
+      }
+      clueModal.style.display = 'none';
+    }
+
+    // Function to handle a correct answer
+    function handleCorrect() {
+      if (currentClueElement) {
+        totalScore += parseInt(currentClueElement.dataset.value);
+        totalScoreSpan.textContent = totalScore;
+        closeClue(true);
+      }
+    }
+
+    // Function to handle an incorrect answer
+    function handleIncorrect() {
+      if (currentClueElement) {
+        totalScore -= parseInt(currentClueElement.dataset.value);
+        totalScoreSpan.textContent = totalScore;
+        closeClue(false);
+      }
+    }
+
+    // Event listener for clicking on a clue
+    function handleClueClick(event) {
+      if (!event.target.classList.contains('correct') && !event.target.classList.contains('incorrect')) {
+        openClue(event.target);
+      }
+    }
+
+    // Event listener for the close button
+    closeButton.addEventListener('click', () => closeClue(null)); // Just close, no correctness info
+
+    // Event listeners for the correct and incorrect buttons
+    correctButton.addEventListener('click', handleCorrect);
+    incorrectButton.addEventListener('click', handleIncorrect);
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(event) {
+      if (clueModal.style.display === 'flex') {
+        if (event.key === 'Escape') {
+          closeClue(null);
+        } else if (event.key === 'c' || event.key === 'C') {
+          handleCorrect();
+        } else if (event.key === 'i' || event.key === 'I') {
+          handleIncorrect();
+        }
+      } else if (event.key === 'Escape') {
+        // You could add functionality here if needed when the modal is closed
+      }
+    });
+
+    // Initialize with the first board visible and attach listeners
+    switchBoard(1);
+  </script>
+
+</body>
+</html>
